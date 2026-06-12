@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-interface BookingItem {
+export interface BookingItem {
   id: number
   booking_id: number
   ticket_category_id: number
@@ -10,7 +10,7 @@ interface BookingItem {
   subtotal: number
 }
 
-interface Booking {
+export interface Booking {
   id: number
   booking_code: string
   user_id: number
@@ -28,16 +28,18 @@ export const useBookingStore = defineStore('booking', () => {
   const bookings = ref<Booking[]>([])
   const currentBooking = ref<Booking | null>(null)
   const loading = ref(false)
+  const error = ref('')
 
   async function reserve(eventId: number, items: { ticket_category_id: number; quantity: number }[]) {
     loading.value = true
+    error.value = ''
     try {
-      const data = await $fetch<Booking>('/api/bookings/reserve', {
-        baseURL: useRuntimeConfig().public.apiBase,
-        method: 'POST',
-        body: { event_id: eventId, items },
-      })
+      const api = useApi()
+      const data = await api.post<Booking>('/api/bookings/reserve', { event_id: eventId, items })
       return data
+    } catch (err: any) {
+      error.value = err?.message || 'Gagal melakukan reservasi'
+      throw err
     } finally {
       loading.value = false
     }
@@ -46,10 +48,8 @@ export const useBookingStore = defineStore('booking', () => {
   async function fetchMyBookings() {
     loading.value = true
     try {
-      const data = await $fetch<Booking[]>('/api/bookings/me', {
-        baseURL: useRuntimeConfig().public.apiBase,
-      })
-      bookings.value = data
+      const api = useApi()
+      bookings.value = await api.get<Booking[]>('/api/bookings/me')
     } finally {
       loading.value = false
     }
@@ -58,15 +58,13 @@ export const useBookingStore = defineStore('booking', () => {
   async function fetchBookingDetail(id: number) {
     loading.value = true
     try {
-      const data = await $fetch<Booking>(`/api/bookings/${id}`, {
-        baseURL: useRuntimeConfig().public.apiBase,
-      })
-      currentBooking.value = data
-      return data
+      const api = useApi()
+      currentBooking.value = await api.get<Booking>(`/api/bookings/${id}`)
+      return currentBooking.value
     } finally {
       loading.value = false
     }
   }
 
-  return { bookings, currentBooking, loading, reserve, fetchMyBookings, fetchBookingDetail }
+  return { bookings, currentBooking, loading, error, reserve, fetchMyBookings, fetchBookingDetail }
 })

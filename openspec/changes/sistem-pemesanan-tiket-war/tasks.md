@@ -104,18 +104,18 @@
 
 ## 11. Frontend: Public Pages
 
-- [ ] 11.1 Halaman Home (`/`) — list upcoming events dengan card grid + filter
-- [ ] 11.2 Halaman Event Detail (`/events/[id]`) — banner, info, ticket categories dengan harga
-- [ ] 11.3 Halaman Events List (`/events`) — searchable & filterable list
-- [ ] 11.4 Komponen `EventCard`, `TicketCategoryCard`, `CountdownTimer` (reusable)
+- [x] 11.1 Halaman Home (`/`) — list upcoming events dengan card grid + filter
+- [x] 11.2 Halaman Event Detail (`/events/[id]`) — banner, info, ticket categories dengan harga
+- [x] 11.3 Halaman Events List (`/events`) — searchable & filterable list
+- [x] 11.4 Komponen `EventCard`, `TicketCategoryCard`, `CountdownTimer` (reusable)
 
 ## 12. Frontend: War Tiket Flow
 
-- [ ] 12.1 Halaman War (`/events/[id]/war`) — countdown, info event, tombol "Mulai War"
-- [ ] 12.2 Halaman Antrian (`/events/[id]/queue`) — posisi, total antrian, ETA, polling tiap 2 detik
-- [ ] 12.3 Komponen `QueueStatus` dengan progress bar dan animasi
-- [ ] 12.4 Halaman Booking (`/events/[id]/booking`) — pilih quantity, ringkasan, tombol "Lanjut Bayar"
-- [ ] 12.5 Integrasi flow: war → queue → ready → booking (dengan handling token expiry)
+- [x] 12.1 Halaman War (`/events/[id]/war`) — countdown, info event, tombol "Mulai War"
+- [x] 12.2 Halaman Antrian (`/events/[id]/queue`) — posisi, total antrian, ETA, polling tiap 2 detik
+- [x] 12.3 Komponen `QueueStatus` dengan progress bar dan animasi
+- [x] 12.4 Halaman Booking (`/events/[id]/booking`) — pilih quantity, ringkasan, tombol "Lanjut Bayar"
+- [x] 12.5 Integrasi flow: war → queue → ready → booking (dengan handling token expiry)
 
 ## 13. Frontend: Booking & Payment Pages
 
