@@ -1,9 +1,9 @@
 <template>
-  <div class="card p-4 flex items-center justify-between">
+  <div class="card p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
     <div class="flex-1">
       <h4 class="font-semibold text-gray-900">{{ category.name }}</h4>
       <p v-if="category.description" class="text-sm text-gray-500 mt-0.5">{{ category.description }}</p>
-      <div class="flex items-center gap-3 mt-2">
+      <div class="flex items-center gap-3 mt-2 flex-wrap">
         <span v-if="isSoldOut" class="badge bg-red-100 text-red-700">Sold Out</span>
         <span v-else class="badge bg-green-100 text-green-700">
           {{ category.available_stock }} tersisa
@@ -11,8 +11,8 @@
         <span class="text-xs text-gray-400">Max {{ category.max_per_user }} tiket</span>
       </div>
     </div>
-    <div class="text-right ml-4">
-      <p class="text-xl font-bold text-primary-600">
+    <div class="text-left sm:text-right shrink-0">
+      <p class="text-xl md:text-2xl font-bold text-primary-600">
         {{ formatPrice(category.price) }}
       </p>
     </div>

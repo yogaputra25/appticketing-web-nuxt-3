@@ -16,7 +16,7 @@ export default defineNuxtConfig({
       title: 'War Tiket — Pemesanan Tiket Konser',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Platform pemesanan tiket konser dengan sistem war tiket yang adil.' },
       ],
       htmlAttrs: { lang: 'id' },

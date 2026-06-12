@@ -1,48 +1,78 @@
 <template>
   <div class="min-h-screen flex">
-    <aside class="w-64 bg-gray-900 text-white flex flex-col shrink-0">
-      <div class="p-4 border-b border-gray-800">
-        <NuxtLink to="/admin" class="flex items-center gap-2 font-bold text-lg">
-          <span class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white text-sm">W</span>
-          Admin Panel
-        </NuxtLink>
-      </div>
+    <Transition name="slide-sidebar">
+      <aside
+        v-if="sidebarOpen || !isMobile"
+        class="bg-gray-900 text-white flex flex-col shrink-0 fixed md:static inset-y-0 left-0 z-50 w-64 transition-transform md:translate-x-0"
+        :class="isMobile && !sidebarOpen ? '-translate-x-full' : ''"
+      >
+        <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+          <NuxtLink to="/admin" class="flex items-center gap-2 font-bold text-lg" @click="sidebarOpen = false">
+            <span class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-white text-sm">W</span>
+            <span class="hidden sm:inline">Admin Panel</span>
+          </NuxtLink>
+          <button
+            v-if="isMobile"
+            class="p-1 rounded-lg hover:bg-gray-800 transition-colors"
+            @click="sidebarOpen = false"
+            aria-label="Close sidebar"
+          >
+            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-        <NuxtLink
-          v-for="item in menuItems"
-          :key="item.to"
-          :to="item.to"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
-          :class="isActive(item.to) ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'"
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+          <NuxtLink
+            v-for="item in menuItems"
+            :key="item.to"
+            :to="item.to"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+            :class="isActive(item.to) ? 'bg-primary-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'"
+            @click="isMobile && (sidebarOpen = false)"
+          >
+            <component :is="item.icon" class="w-5 h-5 shrink-0" />
+            {{ item.label }}
+          </NuxtLink>
+        </nav>
+
+        <div class="p-4 border-t border-gray-800">
+          <NuxtLink to="/" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors" @click="isMobile && (sidebarOpen = false)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Kembali ke Website
+          </NuxtLink>
+        </div>
+      </aside>
+    </Transition>
+
+    <div v-if="isMobile && sidebarOpen" class="fixed inset-0 bg-black/50 z-40" @click="sidebarOpen = false" />
+
+    <div class="flex-1 flex flex-col min-w-0">
+      <header class="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center px-4 md:px-6 gap-4">
+        <button
+          class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors touch-target flex items-center justify-center"
+          @click="sidebarOpen = true"
+          aria-label="Open sidebar"
         >
-          <component :is="item.icon" class="w-5 h-5" />
-          {{ item.label }}
-        </NuxtLink>
-      </nav>
-
-      <div class="p-4 border-t border-gray-800">
-        <NuxtLink to="/" class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-          Kembali ke Website
-        </NuxtLink>
-      </div>
-    </aside>
+        </button>
 
-    <div class="flex-1 flex flex-col">
-      <header class="bg-white shadow-sm border-b border-gray-200 h-16 flex items-center px-6">
-        <h1 class="text-lg font-semibold text-gray-900">{{ pageTitle }}</h1>
-        <div class="ml-auto flex items-center gap-3">
+        <h1 class="text-lg font-semibold text-gray-900 truncate">{{ pageTitle }}</h1>
+
+        <div class="ml-auto flex items-center gap-3 shrink-0">
           <div class="w-8 h-8 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center text-sm font-bold">
             {{ initials }}
           </div>
-          <span class="text-sm font-medium text-gray-700">{{ auth.user?.full_name }}</span>
+          <span class="text-sm font-medium text-gray-700 hidden sm:block truncate max-w-[120px]">{{ auth.user?.full_name }}</span>
         </div>
       </header>
 
-      <main class="flex-1 p-6 bg-gray-50 overflow-y-auto">
+      <main class="flex-1 p-4 md:p-6 bg-gray-50 overflow-y-auto">
         <slot />
       </main>
     </div>
@@ -52,6 +82,8 @@
 <script setup lang="ts">
 const auth = useAuthStore()
 const route = useRoute()
+const { isMobile } = useViewport()
+const sidebarOpen = ref(false)
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
@@ -123,3 +155,14 @@ function isActive(path: string) {
   return route.path.startsWith(path)
 }
 </script>
+
+<style scoped>
+.slide-sidebar-enter-active,
+.slide-sidebar-leave-active {
+  transition: transform 0.25s ease;
+}
+.slide-sidebar-enter-from,
+.slide-sidebar-leave-to {
+  transform: translateX(-100%);
+}
+</style>

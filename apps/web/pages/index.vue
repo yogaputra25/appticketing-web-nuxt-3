@@ -1,26 +1,26 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <section class="text-center py-16 md:py-24">
-      <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <section class="text-center py-12 md:py-24">
+      <h1 class="text-3xl sm:text-4xl md:text-6xl font-bold text-gray-900 mb-3 md:mb-4 leading-tight">
         War Tiket
       </h1>
-      <p class="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+      <p class="text-base md:text-xl text-gray-600 max-w-2xl mx-auto mb-6 md:mb-8 px-2">
         Platform pemesanan tiket konser dengan sistem antrian yang adil. Dapatkan tiket untuk konser favoritmu tanpa khawatir ketinggalan.
       </p>
-      <div class="flex gap-4 justify-center">
-        <NuxtLink to="/events" class="btn-primary text-lg px-8 py-3">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0">
+        <NuxtLink to="/events" class="btn-primary text-base md:text-lg px-6 md:px-8 py-3 touch-target">
           Lihat Events
         </NuxtLink>
-        <NuxtLink v-if="!auth.isAuthenticated" to="/register" class="btn-outline text-lg px-8 py-3">
+        <NuxtLink v-if="!auth.isAuthenticated" to="/register" class="btn-outline text-base md:text-lg px-6 md:px-8 py-3 touch-target">
           Daftar Sekarang
         </NuxtLink>
       </div>
     </section>
 
-    <section class="py-12">
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-2xl font-bold text-gray-900">Event Mendatang</h2>
-        <NuxtLink to="/events" class="text-primary-600 hover:text-primary-700 font-medium">
+    <section class="py-8 md:py-12">
+      <div class="flex items-center justify-between mb-6 md:mb-8">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Event Mendatang</h2>
+        <NuxtLink to="/events" class="text-primary-600 hover:text-primary-700 font-medium text-sm md:text-base">
           Lihat Semua &rarr;
         </NuxtLink>
       </div>
@@ -31,7 +31,7 @@
       <p v-else-if="eventStore.events.length === 0" class="text-center text-gray-500 py-12">
         Belum ada event tersedia.
       </p>
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
         <EventCard v-for="event in eventStore.events" :key="event.id" :event="event" />
       </div>
     </section>

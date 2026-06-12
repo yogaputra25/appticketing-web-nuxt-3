@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 pb-20 md:pb-8">
     <div v-if="loading" class="flex justify-center py-16">
       <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
@@ -13,8 +13,8 @@
 
     <template v-else>
       <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900 mb-1">Antrian War Tiket</h1>
-        <p class="text-gray-500">{{ event.title }} — {{ event.venue }}</p>
+        <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">Antrian War Tiket</h1>
+        <p class="text-gray-500 text-sm md:text-base">{{ event.title }} — {{ event.venue }}</p>
       </div>
 
       <QueueStatus
@@ -25,11 +25,23 @@
 
       <div v-if="isExpired" class="card p-5 mt-4 text-center">
         <p class="text-red-600 font-medium mb-3">Sesi antrianmu telah berakhir</p>
-        <NuxtLink :to="`/events/${event.id}/war`" class="btn-primary">
+        <NuxtLink :to="`/events/${event.id}/war`" class="btn-primary touch-target inline-flex items-center justify-center">
           Gabung Antrian Lagi
         </NuxtLink>
       </div>
     </template>
+
+    <div class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 px-4 py-3">
+      <button
+        class="btn-outline w-full touch-target flex items-center justify-center gap-2 text-sm"
+        @click="handleLeave"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Keluar
+      </button>
+    </div>
   </div>
 </template>
 
@@ -96,6 +108,11 @@ async function loadEvent() {
   } finally {
     loading.value = false
   }
+}
+
+function handleLeave() {
+  stopPolling()
+  router.push(`/events/${route.params.id}`)
 }
 
 onMounted(loadEvent)

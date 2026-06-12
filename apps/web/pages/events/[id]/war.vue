@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
     <div v-if="loading" class="flex justify-center py-16">
       <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
@@ -12,15 +12,15 @@
     </div>
 
     <template v-else>
-      <NuxtLink :to="`/events/${event.id}`" class="text-sm text-gray-500 hover:text-primary-600 mb-4 inline-block">
+      <NuxtLink :to="`/events/${event.id}`" class="text-sm text-gray-500 hover:text-primary-600 mb-3 md:mb-4 inline-block">
         &larr; Kembali ke detail event
       </NuxtLink>
 
       <div class="card overflow-hidden">
         <div class="h-48 bg-gradient-to-br from-accent to-primary-700 flex items-center justify-center">
-          <div class="text-center text-white">
-            <p class="text-sm font-medium opacity-80 mb-1">War Tiket Dimulai dalam</p>
-            <p class="text-5xl md:text-6xl font-bold tabular-nums">
+          <div class="text-center text-white px-4">
+            <p class="text-sm md:text-base font-medium opacity-80 mb-1">War Tiket Dimulai dalam</p>
+            <p class="text-4xl sm:text-5xl md:text-6xl font-bold tabular-nums leading-tight">
               <CountdownTimer
                 :target-date="event.start_date"
                 @expired="isStarted = true"
@@ -29,9 +29,9 @@
           </div>
         </div>
 
-        <div class="p-6 text-center">
-          <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ event.title }}</h1>
-          <p class="text-gray-500 mb-1">{{ event.venue }}</p>
+        <div class="p-5 md:p-6 text-center">
+          <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">{{ event.title }}</h1>
+          <p class="text-gray-500 mb-1 text-sm md:text-base">{{ event.venue }}</p>
           <p class="text-sm text-gray-400 mb-6">
             {{ formatDate(event.start_date) }} — {{ formatDate(event.end_date) }}
           </p>
@@ -41,7 +41,7 @@
           </div>
 
           <button
-            class="btn-accent text-lg px-12 py-3"
+            class="btn-accent w-full sm:w-auto text-base md:text-lg px-8 md:px-12 !min-h-[56px]"
             :disabled="queueStore.loading || joiningInProgress"
             @click="handleJoinWar"
           >
@@ -60,7 +60,7 @@
 
       <div class="card p-5 mt-6">
         <h3 class="font-semibold text-gray-900 mb-3">Cara Kerja War Tiket</h3>
-        <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside">
+        <ol class="space-y-2 text-sm text-gray-600 list-decimal list-inside leading-relaxed">
           <li>Klik tombol <strong>"Mulai War"</strong> saat countdown selesai</li>
           <li>Kamu akan mendapat posisi antrian</li>
           <li>Halaman akan otomatis memperbarui posisimu setiap 2 detik</li>

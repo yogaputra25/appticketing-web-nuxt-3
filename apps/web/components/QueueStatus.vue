@@ -1,8 +1,8 @@
 <template>
-  <div class="card p-6 text-center">
+  <div class="card p-5 md:p-6 text-center">
     <div class="mb-6">
-      <div class="relative w-32 h-32 mx-auto mb-4">
-        <svg class="w-32 h-32 -rotate-90" viewBox="0 0 120 120">
+      <div class="relative w-36 h-36 md:w-40 md:h-40 mx-auto mb-4">
+        <svg class="w-36 h-36 md:w-40 md:h-40 -rotate-90" viewBox="0 0 120 120">
           <circle cx="60" cy="60" r="52" fill="none" stroke="#e5e7eb" stroke-width="8" />
           <circle
             cx="60" cy="60" r="52" fill="none" stroke="#3358ff"
@@ -13,12 +13,12 @@
           />
         </svg>
         <div class="absolute inset-0 flex items-center justify-center flex-col">
-          <span class="text-4xl font-bold text-gray-900">{{ position }}</span>
+          <span class="text-5xl md:text-6xl font-bold text-gray-900">{{ position }}</span>
           <span class="text-sm text-gray-500">antrian</span>
         </div>
       </div>
 
-      <p class="text-gray-600">
+      <p class="text-gray-600 text-sm md:text-base">
         <template v-if="position === 0">
           Giliranmu sudah tiba! Kamu memiliki waktu terbatas untuk melanjutkan ke booking.
         </template>
@@ -32,9 +32,9 @@
       </p>
     </div>
 
-    <div v-if="position > 0" class="w-full bg-gray-200 rounded-full h-2 mb-4">
+    <div v-if="position > 0" class="w-full bg-gray-200 rounded-full h-3 md:h-3.5 mb-4">
       <div
-        class="bg-primary-500 h-2 rounded-full transition-all duration-700 ease-out"
+        class="bg-primary-500 h-3 md:h-3.5 rounded-full transition-all duration-700 ease-out"
         :style="{ width: `${progressPercent}%` }"
       />
     </div>
