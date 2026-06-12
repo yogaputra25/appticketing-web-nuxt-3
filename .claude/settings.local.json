@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openspec status *)",
+      "Bash(openspec instructions *)",
+      "Bash(cd /d D:\\\\ai\\\\appticketing)",
+      "Bash(dir)",
+      "Bash(where psql *)",
+      "Bash(where go *)",
+      "Bash(go version *)",
+      "Bash(go mod *)",
+      "Bash(go build *)",
+      "Bash(go vet *)",
+      "Bash(go test *)",
+      "Bash(JWT_SECRET=test-secret-key-for-verification go run ./cmd/server)",
+      "Bash(curl -s -o /dev/null -w \"HTTP Status: %{http_code}\\\\n\" http://localhost:8080/healthz)",
+      "Bash(where docker *)",
+      "Bash(docker --version)",
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(go install *)",
+      "Bash(where migrate *)",
+      "Read(//c/Users/yoga/go/bin/**)",
+      "Bash(go env *)",
+      "Bash(\"C:/Users/yoga/go/bin/migrate.exe\" -path migrations -database \"postgres://ticketing:ticketing_secret@localhost:5432/ticketing?sslmode=disable\" up)",
+      "Bash(JWT_SECRET=test-secret-key-1234567890 DATABASE_URL=\"postgres://ticketing:ticketing_secret@localhost:5432/ticketing?sslmode=disable\" REDIS_URL=\"redis://localhost:6379\" go run ./cmd/server)",
+      "Bash(curl -s -i http://localhost:8080/healthz)"
+    ]
+  }
+}
