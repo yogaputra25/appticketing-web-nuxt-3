@@ -202,7 +202,16 @@ func (j *JSONStringList) Scan(value interface{}) error {
 	default:
 		return nil
 	}
-	return jsonUnmarshal(bytes, j)
+	if err := jsonUnmarshal(bytes, j); err != nil {
+		var s string
+		if jsonUnmarshal(bytes, &s) == nil {
+			*j = JSONStringList{s}
+			return nil
+		}
+		*j = JSONStringList{}
+		return nil
+	}
+	return nil
 }
 
 // JSONRawMessage is a json.RawMessage-like for gateway_response.

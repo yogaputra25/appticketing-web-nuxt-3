@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -245,9 +246,17 @@ func (q *WarQueue) ScanQueueKeys(ctx context.Context) ([]uint64, error) {
 }
 
 func parseUserEvent(val string) (uint64, uint64, error) {
-	uid, err := strconv.ParseUint(val, 10, 64)
-	if err != nil {
-		return 0, 0, err
+	parts := strings.SplitN(val, ":", 2)
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("invalid format: %s", val)
 	}
-	return uid, 0, nil
+	uid, err := strconv.ParseUint(parts[0], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid user id: %w", err)
+	}
+	eid, err := strconv.ParseUint(parts[1], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid event id: %w", err)
+	}
+	return uid, eid, nil
 }

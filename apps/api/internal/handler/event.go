@@ -310,11 +310,12 @@ func (h *EventHandler) ListPublic(w http.ResponseWriter, r *http.Request) {
 	}
 
 	events, total, err := h.events.List(r.Context(), repository.EventFilter{
-		Status:   status,
-		Upcoming: upcoming,
-		Search:   search,
-		Page:     page,
-		Limit:    limit,
+		Status:          status,
+		Upcoming:        upcoming,
+		ExcludeFinished: true,
+		Search:          search,
+		Page:            page,
+		Limit:           limit,
 	})
 	if err != nil {
 		httputil.Internal(w, err)
@@ -368,6 +369,10 @@ func (h *EventHandler) DetailPublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if e.Status != model.EventStatusPublished {
+		httputil.NotFound(w, "event not found")
+		return
+	}
+	if time.Now().After(e.EndDate) {
 		httputil.NotFound(w, "event not found")
 		return
 	}

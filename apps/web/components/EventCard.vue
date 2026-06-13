@@ -6,6 +6,9 @@
     <div class="aspect-[16/9] bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center relative">
       <span class="text-white text-4xl font-bold">{{ event.title.charAt(0) }}</span>
       <div class="absolute top-3 right-3 flex gap-1.5">
+        <span v-if="isEventEnded" class="badge text-xs bg-red-100 text-red-800">
+          Event Ended
+        </span>
         <span
           class="badge text-xs"
           :class="statusClass"
@@ -60,6 +63,11 @@ const statusLabel = computed(() => {
     case 'finished': return 'Finished'
     default: return props.event.status
   }
+})
+
+const isEventEnded = computed(() => {
+  if (!props.event.end_date) return false
+  return new Date(props.event.end_date) < new Date()
 })
 
 function formatDate(dateStr: string) {

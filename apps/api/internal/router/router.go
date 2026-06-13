@@ -72,7 +72,7 @@ func New(cfg *config.Config, db *gorm.DB, rdb *redis.Client) http.Handler {
 	eventH := handler.NewEventHandler(eventRepo)
 	catH := handler.NewTicketCategoryHandler(catRepo)
 	warH := handler.NewWarHandler(warSvc, eventRepo, catRepo)
-	bookingH := handler.NewBookingHandler(bookingRepo, catRepo, warSvc, cfg.BookingTTLMinutes)
+	bookingH := handler.NewBookingHandler(bookingRepo, catRepo, warSvc, eventRepo, cfg.BookingTTLMinutes)
 	paymentH := handler.NewPaymentHandler(paymentRepo, bookingRepo, catRepo)
 	adminH := handler.NewAdminHandler(bookingRepo, userRepo, eventRepo)
 

@@ -21,6 +21,17 @@ The system SHALL place authenticated users into a virtual queue when they attemp
 - **WHEN** user already has an active queue token
 - **THEN** system returns existing token and position (no duplicate entry)
 
+### Requirement: Join blocked for finished events
+The system SHALL reject war join requests for events whose `end_date` has passed.
+
+#### Scenario: Join finished event
+- **WHEN** user clicks "Mulai War" on an event where `end_date < now()`
+- **THEN** system returns 400 Bad Request with message "event has already ended"
+
+#### Scenario: Join ongoing event
+- **WHEN** user clicks "Mulai War" on an event where `end_date >= now()`
+- **THEN** system proceeds with normal join flow
+
 ### Requirement: Queue Position Polling
 The system SHALL allow queued users to poll their position and estimated wait time.
 

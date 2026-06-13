@@ -8,6 +8,14 @@
       <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
 
+    <div v-else-if="error" class="card p-5 text-center">
+      <p class="text-red-600 font-medium">Gagal memuat detail booking</p>
+      <p class="text-sm text-gray-500 mt-1">{{ error }}</p>
+      <NuxtLink to="/my/bookings" class="text-primary-600 hover:text-primary-700 mt-3 inline-block text-sm">
+        &larr; Kembali
+      </NuxtLink>
+    </div>
+
     <div v-else-if="!booking" class="text-center py-16">
       <p class="text-gray-500 text-lg">Booking tidak ditemukan</p>
     </div>
@@ -43,7 +51,7 @@
           </div>
         </div>
 
-        <div v-if="booking.e_ticket_codes?.length" class="border-t border-dashed border-gray-200 pt-4 mt-4">
+        <div v-if="Array.isArray(booking.e_ticket_codes) && booking.e_ticket_codes.length" class="border-t border-dashed border-gray-200 pt-4 mt-4">
           <h3 class="font-semibold text-gray-900 mb-3">E-Ticket Codes</h3>
           <div class="space-y-2">
             <div v-for="(code, i) in booking.e_ticket_codes" :key="i" class="bg-gray-50 rounded-lg px-4 py-3 font-mono text-sm text-gray-800 break-all">
@@ -92,6 +100,7 @@ const booking = computed(() => bookingStore.currentBooking)
 const loading = computed(() => bookingStore.loading)
 const cancelling = ref(false)
 const cancelError = ref('')
+const error = ref('')
 
 const statusClass = computed(() => {
   const classes: Record<string, string> = {
@@ -105,7 +114,7 @@ const statusClass = computed(() => {
 
 const ticketCount = computed(() => {
   if (!booking.value) return 0
-  if (booking.value.e_ticket_codes?.length) return booking.value.e_ticket_codes.length
+  if (Array.isArray(booking.value.e_ticket_codes) && booking.value.e_ticket_codes.length) return booking.value.e_ticket_codes.length
   if (booking.value.items) return booking.value.items.reduce((s: number, i: any) => s + i.quantity, 0)
   return 0
 })
@@ -143,6 +152,10 @@ async function handleCancel() {
 }
 
 onMounted(async () => {
-  await bookingStore.fetchBookingDetail(Number(route.params.id))
+  try {
+    await bookingStore.fetchBookingDetail(Number(route.params.id))
+  } catch (err: any) {
+    error.value = err?.message || 'Terjadi kesalahan saat memuat data booking'
+  }
 })
 </script>

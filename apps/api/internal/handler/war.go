@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ticketing/api/internal/auth"
 	"github.com/ticketing/api/internal/httputil"
@@ -59,6 +60,15 @@ func (h *WarHandler) Join(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if time.Now().Before(event.StartDate) {
+		httputil.BadRequest(w, "event has not started yet", nil)
+		return
+	}
+	if time.Now().After(event.EndDate) {
+		httputil.BadRequest(w, "event has already ended", nil)
+		return
+	}
+
 	allSoldOut := true
 	for _, cat := range event.Categories {
 		if cat.AvailableStock > 0 {
@@ -68,8 +78,14 @@ func (h *WarHandler) Join(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !allSoldOut {
+		sessionToken, err := h.war.IssueBookingSession(r.Context(), userID, eventID)
+		if err != nil {
+			httputil.Internal(w, err)
+			return
+		}
 		httputil.OK(w, map[string]interface{}{
 			"redirect_to_booking": true,
+			"session_token":       sessionToken,
 			"message":             "Tickets are available. Proceed to booking.",
 		})
 		return

@@ -17,7 +17,13 @@
       </NuxtLink>
 
       <div class="card overflow-hidden">
-        <div class="h-48 bg-gradient-to-br from-accent to-primary-700 flex items-center justify-center">
+        <div v-if="isEventEnded" class="h-48 bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center">
+          <div class="text-center text-white px-4">
+            <p class="text-2xl sm:text-3xl md:text-4xl font-bold">Event Ended</p>
+            <p class="text-sm md:text-base font-medium opacity-80 mt-2">Tiket sudah tidak tersedia</p>
+          </div>
+        </div>
+        <div v-else class="h-48 bg-gradient-to-br from-accent to-primary-700 flex items-center justify-center">
           <div class="text-center text-white px-4">
             <p class="text-sm md:text-base font-medium opacity-80 mb-1">War Tiket Dimulai dalam</p>
             <p class="text-4xl sm:text-5xl md:text-6xl font-bold tabular-nums leading-tight">
@@ -41,8 +47,9 @@
           </div>
 
           <button
+            v-if="!isEventEnded"
             class="btn-accent w-full sm:w-auto text-base md:text-lg px-8 md:px-12 !min-h-[56px]"
-            :disabled="queueStore.loading || joiningInProgress"
+            :disabled="queueStore.loading || joiningInProgress || !isStarted"
             @click="handleJoinWar"
           >
             <svg v-if="queueStore.loading" class="animate-spin -ml-1 mr-2 h-5 w-5 inline" fill="none" viewBox="0 0 24 24">
@@ -52,7 +59,7 @@
             {{ queueStore.loading ? 'Memproses...' : joiningInProgress ? 'Mengarahkan...' : 'Mulai War' }}
           </button>
 
-          <p class="text-sm text-gray-400 mt-4">
+          <p v-if="!isEventEnded" class="text-sm text-gray-400 mt-4">
             Pastikan koneksi internetmu stabil. Sistem akan menempatkanmu dalam antrian secara adil.
           </p>
         </div>
@@ -89,6 +96,11 @@ const joiningError = ref('')
 const event = computed(() => eventStore.currentEvent)
 const loading = ref(false)
 
+const isEventEnded = computed(() => {
+  if (!event.value?.end_date) return false
+  return new Date(event.value.end_date) < new Date()
+})
+
 async function loadEvent() {
   const id = Number(route.params.id)
   if (isNaN(id)) return
@@ -101,6 +113,7 @@ async function loadEvent() {
 }
 
 async function handleJoinWar() {
+  if (!isStarted.value) return
   joiningError.value = ''
   joiningInProgress.value = true
   try {
@@ -108,7 +121,7 @@ async function handleJoinWar() {
     queueStore.reset()
 
     if ((result as any).redirect_to_booking) {
-      router.push(`/events/${route.params.id}/booking`)
+      router.push(`/events/${route.params.id}/booking?token=${(result as any).session_token}`)
     } else if (result.is_ready || result.position === 0) {
       router.push(`/events/${route.params.id}/booking?token=${result.token}`)
     } else {

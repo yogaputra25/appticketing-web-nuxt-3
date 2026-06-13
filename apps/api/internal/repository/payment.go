@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -59,7 +60,11 @@ func (r *PaymentRepository) UpdateStatus(ctx context.Context, id uint64, status 
 		updates["paid_at"] = paidAt
 	}
 	if gatewayResp != nil {
-		updates["gateway_response"] = gatewayResp
+		b, err := json.Marshal(gatewayResp)
+		if err != nil {
+			return err
+		}
+		updates["gateway_response"] = model.JSONRawMessage(b)
 	}
 
 	res := r.db.WithContext(ctx).

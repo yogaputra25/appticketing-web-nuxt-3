@@ -40,7 +40,15 @@
         </NuxtLink>
       </div>
 
-      <template v-if="!sessionExpired && hasActiveSession">
+      <div v-if="eventNotStarted" class="card p-5 mb-6 text-center">
+        <p class="text-yellow-700 font-medium mb-2">Event belum dimulai</p>
+        <p class="text-sm text-gray-500">Halaman booking akan tersedia setelah event dimulai.</p>
+        <NuxtLink :to="`/events/${event.id}/war`" class="btn-primary touch-target inline-flex items-center justify-center mt-4">
+          Kembali ke War
+        </NuxtLink>
+      </div>
+
+      <template v-if="!sessionExpired && hasActiveSession && !eventNotStarted">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-3">
             <h3 class="font-semibold text-gray-900">Pilih Jumlah Tiket</h3>
@@ -158,6 +166,10 @@ const bookingError = ref('')
 const quantities = ref<Record<number, number>>({})
 
 const event = computed(() => eventStore.currentEvent)
+const eventNotStarted = computed(() => {
+  if (!event.value?.start_date) return false
+  return new Date(event.value.start_date) > new Date()
+})
 const sessionToken = computed(() => (route.query.token as string) || '')
 const hasActiveSession = computed(() => !!sessionToken.value && !sessionExpired.value)
 

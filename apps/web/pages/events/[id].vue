@@ -1,5 +1,6 @@
 <template>
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+  <NuxtPage v-if="isChildRoute" />
+  <div v-else class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
     <div v-if="loading" class="flex justify-center py-16">
       <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin" />
     </div>
@@ -29,6 +30,7 @@
             >
               {{ event.status === 'published' ? 'Published' : 'Draft' }}
             </span>
+            <span v-if="isEventEnded" class="badge bg-red-100 text-red-800">Event Ended</span>
           </div>
 
           <h1 class="text-2xl md:text-4xl font-bold text-gray-900 mb-3 md:mb-4">{{ event.title }}</h1>
@@ -70,7 +72,7 @@
               />
 
               <NuxtLink
-                v-if="auth.isAuthenticated && hasAvailableStock"
+                v-if="mounted && auth.isAuthenticated && hasAvailableStock && !isEventEnded"
                 :to="`/events/${event.id}/war`"
                 class="btn-accent w-full mt-4 touch-target flex items-center justify-center"
               >
@@ -78,11 +80,11 @@
               </NuxtLink>
 
               <NuxtLink
-                v-else-if="!auth.isAuthenticated"
+                v-else-if="!isEventEnded && (!mounted || !auth.isAuthenticated)"
                 :to="`/login?redirect=/events/${event.id}`"
                 class="btn-primary w-full mt-4 touch-target flex items-center justify-center"
               >
-                Masuk untuk Membeli
+                {{ mounted ? 'Masuk untuk Membeli' : 'Memuat...' }}
               </NuxtLink>
             </div>
           </div>
@@ -97,11 +99,22 @@ const auth = useAuthStore()
 const eventStore = useEventStore()
 const route = useRoute()
 
+const mounted = ref(false)
+
+const isChildRoute = computed(() => {
+  return route.name?.toString().startsWith('events-id-') ?? false
+})
+
 const event = computed(() => eventStore.currentEvent)
 const loading = ref(false)
 
 const hasAvailableStock = computed(() => {
   return event.value?.categories?.some(c => c.available_stock > 0) ?? false
+})
+
+const isEventEnded = computed(() => {
+  if (!event.value?.end_date) return false
+  return new Date(event.value.end_date) < new Date()
 })
 
 async function loadEvent() {
@@ -115,7 +128,10 @@ async function loadEvent() {
   }
 }
 
-onMounted(loadEvent)
+onMounted(() => {
+  mounted.value = true
+  loadEvent()
+})
 watch(() => route.params.id, loadEvent)
 
 function formatDate(dateStr: string) {

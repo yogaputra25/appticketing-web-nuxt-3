@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -165,10 +166,14 @@ func (r *BookingRepository) UpdateStatus(ctx context.Context, id uint64, status 
 
 // UpdateETicketCodes sets the e-ticket codes for a booking.
 func (r *BookingRepository) UpdateETicketCodes(ctx context.Context, id uint64, codes []string) error {
+	b, err := json.Marshal(codes)
+	if err != nil {
+		return err
+	}
 	return r.db.WithContext(ctx).
 		Model(&model.Booking{}).
 		Where("id = ?", id).
-		Update("e_ticket_codes", model.JSONStringList(codes)).Error
+		Update("e_ticket_codes", string(b)).Error
 }
 
 // CancelBooking cancels a pending booking and releases stock.

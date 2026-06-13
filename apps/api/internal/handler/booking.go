@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 
@@ -17,11 +18,12 @@ type BookingHandler struct {
 	bookings *repository.BookingRepository
 	cats     *repository.TicketCategoryRepository
 	war      *service.WarQueue
+	events   *repository.EventRepository
 	ttlMin   int
 }
 
-func NewBookingHandler(bookings *repository.BookingRepository, cats *repository.TicketCategoryRepository, war *service.WarQueue, ttlMin int) *BookingHandler {
-	return &BookingHandler{bookings: bookings, cats: cats, war: war, ttlMin: ttlMin}
+func NewBookingHandler(bookings *repository.BookingRepository, cats *repository.TicketCategoryRepository, war *service.WarQueue, events *repository.EventRepository, ttlMin int) *BookingHandler {
+	return &BookingHandler{bookings: bookings, cats: cats, war: war, events: events, ttlMin: ttlMin}
 }
 
 type reserveRequest struct {
@@ -54,11 +56,25 @@ func (h *BookingHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 
 	uid, _, err := h.war.ValidateBookingSession(r.Context(), req.Session)
 	if err != nil {
-		httputil.Unauthorized(w, "Invalid or expired session token. Please rejoin the queue.")
+		httputil.BadRequest(w, "Invalid or expired session token. Please rejoin the queue.", nil)
 		return
 	}
 	if uid != userID {
 		httputil.Forbidden(w, "session token does not match user")
+		return
+	}
+
+	event, err := h.events.FindByID(r.Context(), req.EventID)
+	if err != nil {
+		if errors.Is(err, repository.ErrEventNotFound) {
+			httputil.NotFound(w, "event not found")
+			return
+		}
+		httputil.Internal(w, err)
+		return
+	}
+	if time.Now().After(event.EndDate) {
+		httputil.BadRequest(w, "event has already ended", nil)
 		return
 	}
 

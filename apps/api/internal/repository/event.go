@@ -13,12 +13,13 @@ import (
 var ErrEventNotFound = errors.New("event not found")
 
 type EventFilter struct {
-	Status      string
-	Upcoming    bool
-	Search      string
-	Page        int
-	Limit       int
-	IncludeCats bool
+	Status         string
+	Upcoming       bool
+	ExcludeFinished bool
+	Search         string
+	Page           int
+	Limit          int
+	IncludeCats    bool
 }
 
 type EventRepository struct {
@@ -140,6 +141,9 @@ func (r *EventRepository) List(ctx context.Context, f EventFilter) ([]model.Even
 	}
 	if f.Upcoming {
 		q = q.Where("start_date > ?", "now()")
+	}
+	if f.ExcludeFinished {
+		q = q.Where("end_date >= ?", "now()")
 	}
 	if strings.TrimSpace(f.Search) != "" {
 		like := "%" + strings.ToLower(f.Search) + "%"

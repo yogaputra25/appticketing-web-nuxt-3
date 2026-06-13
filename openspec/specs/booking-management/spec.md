@@ -36,6 +36,17 @@ The system SHALL allow users to view their booking history with status and event
 - **WHEN** user requests a booking ID that belongs to another user
 - **THEN** system returns 404 Not Found (does not reveal existence)
 
+### Requirement: Reserve blocked for finished events
+The system SHALL reject booking reserve requests for events whose `end_date` has passed.
+
+#### Scenario: Reserve for finished event
+- **WHEN** user with valid booking session token attempts to reserve tickets for an event where `end_date < now()`
+- **THEN** system returns 400 Bad Request with message "event has already ended"
+
+#### Scenario: Reserve for ongoing event
+- **WHEN** user with valid booking session token attempts to reserve tickets for an event where `end_date >= now()`
+- **THEN** system proceeds with normal reservation flow
+
 ### Requirement: Cancel Booking
 The system SHALL allow users to cancel a `pending_payment` booking and release the held stock.
 
