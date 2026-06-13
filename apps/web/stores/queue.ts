@@ -3,9 +3,10 @@ import { ref } from 'vue'
 
 export interface QueueStatus {
   position: number
-  total_before: number
+  total_before?: number
   is_ready: boolean
   token: string
+  session_token?: string
   expires_at: string
   total_in_queue?: number
 }
@@ -21,7 +22,7 @@ export const useQueueStore = defineStore('queue', () => {
     error.value = ''
     try {
       const api = useApi()
-      const data = await api.post<QueueStatus>('/api/war/join', { event_id: eventId })
+      const data = await api.post<QueueStatus>(`/api/war/join?event_id=${eventId}`)
       status.value = data
       return data
     } catch (err: any) {

@@ -1,4 +1,7 @@
 export default defineNuxtRouteMiddleware(() => {
+  // Skip during SSR — auth is restored from localStorage on client hydration
+  if (import.meta.server) return
+
   const auth = useAuthStore()
 
   if (!auth.isAuthenticated) {

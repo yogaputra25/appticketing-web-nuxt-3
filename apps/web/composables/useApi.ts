@@ -28,11 +28,14 @@ export function useApi() {
       })
       return data
     } catch (err: any) {
-      if (err?.response?.status === 401) {
+      const status = err?.response?.status ?? err?.statusCode ?? err?.status
+      if (status === 401) {
         auth.clearAuth()
-        navigateTo('/login')
+        if (import.meta.client) {
+          await navigateTo('/login')
+        }
       }
-      const apiError: ApiError = err?.data || { error: 'unknown', message: err?.message }
+      const apiError: ApiError = err?.data || err?.data?.data || { error: 'unknown', message: err?.message }
       throw apiError
     }
   }

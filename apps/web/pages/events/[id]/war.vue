@@ -107,7 +107,9 @@ async function handleJoinWar() {
     const result = await queueStore.joinWar(Number(route.params.id))
     queueStore.reset()
 
-    if (result.is_ready || result.position === 0) {
+    if ((result as any).redirect_to_booking) {
+      router.push(`/events/${route.params.id}/booking`)
+    } else if (result.is_ready || result.position === 0) {
       router.push(`/events/${route.params.id}/booking?token=${result.token}`)
     } else {
       router.push(`/events/${route.params.id}/queue?token=${result.token}`)

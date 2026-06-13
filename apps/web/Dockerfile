@@ -1,10 +1,11 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies (use `npm install` rather than `npm ci` because the
+# lockfile is sometimes out of sync with package.json during dev).
 FROM base AS deps
 COPY package*.json ./
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
 # Build
 FROM base AS build

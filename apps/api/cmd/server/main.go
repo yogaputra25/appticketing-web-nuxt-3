@@ -39,7 +39,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	worker.StartExpiryJobs(ctx, db)
+	worker.StartExpiryJobs(ctx, db, rdb, &worker.Config{
+		QueueSessionTTLMinutes: cfg.QueueSessionTTLMinutes,
+		WarRateLimitPerMin:     cfg.WarRateLimitPerMin,
+	})
 
 	r := router.New(cfg, db, rdb)
 

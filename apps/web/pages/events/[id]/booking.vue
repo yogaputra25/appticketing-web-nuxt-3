@@ -196,12 +196,12 @@ function decrement(categoryId: number) {
 async function handleReserve() {
   bookingError.value = ''
   const items = selectedItems.value.map(i => ({
-    ticket_category_id: i.categoryId,
+    category_id: i.categoryId,
     quantity: i.qty,
   }))
 
   try {
-    const booking = await bookingStore.reserve(Number(route.params.id), items)
+    const booking = await bookingStore.reserve(Number(route.params.id), items, sessionToken.value)
     router.push(`/bookings/${booking.id}/pay`)
   } catch (err: any) {
     bookingError.value = err?.message || 'Gagal melakukan reservasi'

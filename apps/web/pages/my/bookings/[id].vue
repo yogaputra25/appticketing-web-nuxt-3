@@ -18,8 +18,12 @@
 
         <div class="space-y-3 mb-6">
           <div class="flex justify-between items-center py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">Kode Booking</span>
+            <span class="text-sm font-mono font-medium text-gray-900">{{ booking.booking_code }}</span>
+          </div>
+          <div v-if="booking.event" class="flex justify-between items-center py-2 border-b border-gray-100">
             <span class="text-sm text-gray-500">Event</span>
-            <span class="text-sm font-medium text-gray-900 text-right">{{ booking.event_title }}</span>
+            <span class="text-sm font-medium text-gray-900 text-right">{{ booking.event.title }}</span>
           </div>
           <div class="flex justify-between items-center py-2 border-b border-gray-100">
             <span class="text-sm text-gray-500">Status</span>
@@ -27,25 +31,41 @@
           </div>
           <div class="flex justify-between items-center py-2 border-b border-gray-100">
             <span class="text-sm text-gray-500">Tiket</span>
-            <span class="text-sm font-medium text-gray-900">{{ booking.ticket_count }} tiket</span>
+            <span class="text-sm font-medium text-gray-900">{{ ticketCount }} tiket</span>
           </div>
-          <div v-if="booking.total_price" class="flex justify-between items-center py-2 border-b border-gray-100">
+          <div class="flex justify-between items-center py-2 border-b border-gray-100">
             <span class="text-sm text-gray-500">Total</span>
-            <span class="text-sm font-bold text-gray-900">{{ formatPrice(booking.total_price) }}</span>
+            <span class="text-sm font-bold text-gray-900">{{ formatPrice(booking.total_amount) }}</span>
+          </div>
+          <div v-if="booking.expires_at && booking.status === 'pending'" class="flex justify-between items-center py-2 border-b border-gray-100">
+            <span class="text-sm text-gray-500">Batas Bayar</span>
+            <span class="text-sm font-medium text-gray-900">{{ formatDate(booking.expires_at) }}</span>
           </div>
         </div>
 
-        <div class="flex justify-center py-6 border-t border-dashed border-gray-200">
-          <div class="bg-gray-100 w-48 h-48 flex items-center justify-center rounded-xl">
-            <div class="text-center">
-              <svg class="w-16 h-16 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4b2 2 0 012 2v3a2 2 0 01-2 2h-4a2 2 0 01-2-2v-3a2 2 0 012-2z" />
-              </svg>
-              <p class="text-xs text-gray-500">QR Code</p>
+        <div v-if="booking.e_ticket_codes?.length" class="border-t border-dashed border-gray-200 pt-4 mt-4">
+          <h3 class="font-semibold text-gray-900 mb-3">E-Ticket Codes</h3>
+          <div class="space-y-2">
+            <div v-for="(code, i) in booking.e_ticket_codes" :key="i" class="bg-gray-50 rounded-lg px-4 py-3 font-mono text-sm text-gray-800 break-all">
+              {{ code }}
             </div>
           </div>
+          <p class="text-center text-xs text-gray-400 mt-3">Tunjukkan kode ini di pintu masuk</p>
         </div>
-        <p class="text-center text-xs text-gray-400 mt-2">Tunjukkan QR code ini di pintu masuk</p>
+      </div>
+
+      <div v-if="booking.status === 'pending'" class="mt-4">
+        <div class="card p-4 flex flex-col sm:flex-row gap-3">
+          <NuxtLink :to="`/bookings/${booking.id}/pay`" class="btn-primary flex-1 touch-target flex items-center justify-center text-sm">
+            Lanjut Bayar
+          </NuxtLink>
+          <button class="btn-outline flex-1 touch-target flex items-center justify-center text-sm text-red-600 border-red-200 hover:bg-red-50" :disabled="cancelling" @click="handleCancel">
+            {{ cancelling ? 'Membatalkan...' : 'Batalkan Pesanan' }}
+          </button>
+        </div>
+        <div v-if="cancelError" class="text-sm text-red-600 bg-red-50 rounded-lg p-3 mt-3">
+          {{ cancelError }}
+        </div>
       </div>
     </template>
 
@@ -53,9 +73,9 @@
       <NuxtLink to="/my/bookings" class="btn-outline flex-1 touch-target flex items-center justify-center text-sm">
         Kembali
       </NuxtLink>
-      <button class="btn-primary flex-1 touch-target flex items-center justify-center text-sm" @click="handleDownload">
-        Download
-      </button>
+      <NuxtLink v-if="booking?.status === 'pending'" :to="`/bookings/${booking.id}/pay`" class="btn-primary flex-1 touch-target flex items-center justify-center text-sm">
+        Lanjut Bayar
+      </NuxtLink>
     </div>
   </div>
 </template>
@@ -66,27 +86,28 @@ definePageMeta({
 })
 
 const route = useRoute()
+const bookingStore = useBookingStore()
 
-interface Booking {
-  id: number
-  event_title: string
-  ticket_count: number
-  total_price: number
-  status: string
-  created_at: string
-}
-
-const booking = ref<Booking | null>(null)
-const loading = ref(true)
+const booking = computed(() => bookingStore.currentBooking)
+const loading = computed(() => bookingStore.loading)
+const cancelling = ref(false)
+const cancelError = ref('')
 
 const statusClass = computed(() => {
   const classes: Record<string, string> = {
-    confirmed: 'bg-green-100 text-green-800',
+    paid: 'bg-green-100 text-green-800',
     pending: 'bg-yellow-100 text-yellow-800',
     cancelled: 'bg-red-100 text-red-800',
     expired: 'bg-gray-100 text-gray-800',
   }
   return classes[booking.value?.status || ''] || 'bg-gray-100 text-gray-800'
+})
+
+const ticketCount = computed(() => {
+  if (!booking.value) return 0
+  if (booking.value.e_ticket_codes?.length) return booking.value.e_ticket_codes.length
+  if (booking.value.items) return booking.value.items.reduce((s: number, i: any) => s + i.quantity, 0)
+  return 0
 })
 
 function formatPrice(price: number) {
@@ -98,19 +119,30 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
-function handleDownload() {
-  // placeholder
+function formatDate(dateStr: string) {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+async function handleCancel() {
+  cancelling.value = true
+  cancelError.value = ''
+  try {
+    await bookingStore.cancelBooking(Number(route.params.id))
+  } catch (err: any) {
+    cancelError.value = err?.message || 'Gagal membatalkan booking'
+  } finally {
+    cancelling.value = false
+  }
 }
 
 onMounted(async () => {
-  try {
-    const api = useApi()
-    const data = await api.get<Booking>(`/bookings/${route.params.id}`)
-    booking.value = data
-  } catch {
-    // silent
-  } finally {
-    loading.value = false
-  }
+  await bookingStore.fetchBookingDetail(Number(route.params.id))
 })
 </script>

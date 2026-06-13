@@ -34,6 +34,17 @@ func (r *EventRepository) Create(ctx context.Context, e *model.Event) error {
 	return r.db.WithContext(ctx).Create(e).Error
 }
 
+func (r *EventRepository) BulkCreateCategories(ctx context.Context, categories []model.TicketCategory) error {
+	if len(categories) == 0 {
+		return nil
+	}
+	return r.db.WithContext(ctx).Create(&categories).Error
+}
+
+func (r *EventRepository) DeleteCategoriesByEvent(ctx context.Context, eventID uint64) error {
+	return r.db.WithContext(ctx).Where("event_id = ?", eventID).Delete(&model.TicketCategory{}).Error
+}
+
 func (r *EventRepository) FindByID(ctx context.Context, id uint64) (*model.Event, error) {
 	return r.findOne(ctx, func(q *gorm.DB) *gorm.DB {
 		return q.Where("id = ?", id)

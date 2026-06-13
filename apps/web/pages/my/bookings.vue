@@ -29,8 +29,8 @@
         >
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
-              <h3 class="font-semibold text-gray-900 truncate">{{ booking.event_title }}</h3>
-              <p class="text-sm text-gray-500 mt-0.5">{{ booking.ticket_count }} tiket</p>
+              <h3 class="font-semibold text-gray-900 truncate">{{ booking.event?.title }}</h3>
+              <p class="text-sm text-gray-500 mt-0.5">{{ ticketCount(booking) }} tiket</p>
               <p class="text-xs text-gray-400 mt-0.5">{{ formatDate(booking.created_at) }}</p>
             </div>
             <span class="badge shrink-0" :class="statusClass(booking.status)">{{ booking.status }}</span>
@@ -51,8 +51,8 @@
           </thead>
           <tbody>
             <tr v-for="booking in bookings" :key="booking.id" class="border-b border-gray-100">
-              <td class="py-3 font-medium text-gray-900">{{ booking.event_title }}</td>
-              <td class="py-3 text-sm text-gray-600">{{ booking.ticket_count }} tiket</td>
+              <td class="py-3 font-medium text-gray-900">{{ booking.event?.title }}</td>
+              <td class="py-3 text-sm text-gray-600">{{ ticketCount(booking) }} tiket</td>
               <td class="py-3">
                 <span class="badge" :class="statusClass(booking.status)">{{ booking.status }}</span>
               </td>
@@ -75,25 +75,25 @@ definePageMeta({
   middleware: 'auth',
 })
 
-interface Booking {
-  id: number
-  event_title: string
-  ticket_count: number
-  status: string
-  created_at: string
-}
-
-const bookings = ref<Booking[]>([])
-const loading = ref(true)
+const bookingStore = useBookingStore()
+const bookings = computed(() => bookingStore.bookings)
+const loading = computed(() => bookingStore.loading)
+const total = computed(() => bookingStore.total)
 
 function statusClass(status: string) {
   const classes: Record<string, string> = {
-    confirmed: 'bg-green-100 text-green-800',
+    paid: 'bg-green-100 text-green-800',
     pending: 'bg-yellow-100 text-yellow-800',
     cancelled: 'bg-red-100 text-red-800',
     expired: 'bg-gray-100 text-gray-800',
   }
   return classes[status] || 'bg-gray-100 text-gray-800'
+}
+
+function ticketCount(booking: any) {
+  if (booking.e_ticket_codes?.length) return booking.e_ticket_codes.length
+  if (booking.items) return booking.items.reduce((s: number, i: any) => s + i.quantity, 0)
+  return 0
 }
 
 function formatDate(dateStr: string) {
@@ -105,14 +105,6 @@ function formatDate(dateStr: string) {
 }
 
 onMounted(async () => {
-  try {
-    const api = useApi()
-    const data = await api.get<Booking[]>('/bookings')
-    bookings.value = data
-  } catch {
-    // silent
-  } finally {
-    loading.value = false
-  }
+  await bookingStore.fetchMyBookings()
 })
 </script>

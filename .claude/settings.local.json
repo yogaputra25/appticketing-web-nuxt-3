@@ -24,7 +24,13 @@
       "Bash(go env *)",
       "Bash(\"C:/Users/yoga/go/bin/migrate.exe\" -path migrations -database \"postgres://ticketing:ticketing_secret@localhost:5432/ticketing?sslmode=disable\" up)",
       "Bash(JWT_SECRET=test-secret-key-1234567890 DATABASE_URL=\"postgres://ticketing:ticketing_secret@localhost:5432/ticketing?sslmode=disable\" REDIS_URL=\"redis://localhost:6379\" go run ./cmd/server)",
-      "Bash(curl -s -i http://localhost:8080/healthz)"
+      "Bash(curl -s -i http://localhost:8080/healthz)",
+      "Bash(curl -sS -i -X GET http://localhost:3001/)",
+      "Bash(curl -sS -i http://localhost:3001/login)",
+      "Bash(curl -sS -i -X OPTIONS http://localhost:8081/api/auth/login -H \"Origin: http://localhost:3001\" -H \"Access-Control-Request-Method: POST\" -H \"Access-Control-Request-Headers: Content-Type\")",
+      "Bash(curl -sS http://localhost:8081/api/events)",
+      "Bash(openspec list *)",
+      "Bash(curl -sS -X POST http://localhost:8081/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@example.com\",\"password\":\"admin123\"}')"
     ]
   }
 }

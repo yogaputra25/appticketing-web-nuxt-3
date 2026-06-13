@@ -71,7 +71,8 @@ async function pollQueue() {
 
     if (status.is_ready) {
       stopPolling()
-      router.push(`/events/${route.params.id}/booking?token=${status.token}`)
+      const token = status.session_token || status.token
+      router.push(`/events/${route.params.id}/booking?token=${token}`)
     }
   } catch (err: any) {
     retryCount.value++

@@ -11,9 +11,51 @@ export interface User {
   updated_at: string
 }
 
+const STORAGE_KEY = 'wartiket_auth'
+
+interface PersistedAuth {
+  token: string
+  user: User
+}
+
+function readPersisted(): PersistedAuth | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (parsed && typeof parsed.token === 'string' && parsed.user) {
+      return parsed as PersistedAuth
+    }
+  } catch {
+    // ignore parse error
+  }
+  return null
+}
+
+function writePersisted(token: string, user: User) {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ token, user }))
+  } catch {
+    // ignore quota / private mode errors
+  }
+}
+
+function clearPersisted() {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // ignore
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(null)
-  const user = ref<User | null>(null)
+  // Hydrate from localStorage (only on client; SSR will use null then re-hydrate)
+  const initial = readPersisted()
+  const token = ref<string | null>(initial?.token ?? null)
+  const user = ref<User | null>(initial?.user ?? null)
   const loading = ref(false)
 
   const isAuthenticated = computed(() => !!token.value)
@@ -22,11 +64,13 @@ export const useAuthStore = defineStore('auth', () => {
   function setAuth(t: string, u: User) {
     token.value = t
     user.value = u
+    writePersisted(t, u)
   }
 
   function clearAuth() {
     token.value = null
     user.value = null
+    clearPersisted()
   }
 
   async function login(email: string, password: string) {
@@ -67,6 +111,8 @@ export const useAuthStore = defineStore('auth', () => {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       user.value = u
+      // Re-persist in case user data changed
+      if (token.value) writePersisted(token.value, u)
     } catch {
       clearAuth()
     }

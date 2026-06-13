@@ -71,7 +71,7 @@ async function handleSave() {
   saveError.value = ''
   try {
     const api = useApi()
-    await api.post('/admin/events', form)
+    await api.post('/api/admin/events', form)
     router.push('/admin/events')
   } catch (err: any) {
     saveError.value = err?.message || 'Gagal menyimpan event'

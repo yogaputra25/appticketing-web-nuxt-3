@@ -4,7 +4,10 @@
       "Bash(which openspec *)",
       "Read(//usr/local/**)",
       "Read(//d//**)",
-      "Bash(npx openspec *)"
+      "Bash(npx openspec *)",
+      "Bash(curl -sS -m 5 -i -X POST http://localhost:8080/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@demo.test\",\"password\":\"admin123\"}')",
+      "Bash(docker rm *)",
+      "Bash(curl -sS -i -X POST http://localhost:8081/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@example.com\",\"password\":\"admin123\"}')"
     ]
   }
 }

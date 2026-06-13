@@ -62,11 +62,25 @@
             {{ saveError }}
           </div>
 
-          <button type="submit" class="btn-primary touch-target" :disabled="saving">
-            {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
-          </button>
+          <div class="flex flex-col sm:flex-row gap-3">
+            <button type="submit" class="btn-primary touch-target flex-1" :disabled="saving">
+              {{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}
+            </button>
+            <button v-if="eventStatus === 'draft'" type="button" class="btn-success touch-target flex-1" :disabled="publishing" @click="handlePublish">
+              {{ publishing ? 'Mempublikasikan...' : 'Publikasikan Event' }}
+            </button>
+          </div>
+
+          <div v-if="publishError" class="text-sm text-red-600 bg-red-50 rounded-lg p-3">
+            {{ publishError }}
+          </div>
         </div>
       </form>
+
+      <div v-if="eventStatus" class="mt-4 flex items-center gap-2">
+        <span class="text-sm text-gray-500">Status:</span>
+        <span class="badge text-xs" :class="statusBadge(eventStatus)">{{ eventStatus }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -82,6 +96,9 @@ const router = useRouter()
 const loading = ref(true)
 const saving = ref(false)
 const saveError = ref('')
+const publishing = ref(false)
+const publishError = ref('')
+const eventStatus = ref('')
 
 const form = reactive({
   title: '',
@@ -92,10 +109,20 @@ const form = reactive({
   categories: [] as { name: string; price: number; stock: number }[],
 })
 
+function statusBadge(status: string) {
+  const map: Record<string, string> = {
+    published: 'bg-green-100 text-green-800',
+    draft: 'bg-yellow-100 text-yellow-800',
+    cancelled: 'bg-red-100 text-red-800',
+    finished: 'bg-gray-100 text-gray-800',
+  }
+  return map[status] || 'bg-gray-100 text-gray-800'
+}
+
 async function loadEvent() {
   try {
     const api = useApi()
-    const data = await api.get<any>(`/admin/events/${route.params.id}`)
+    const data = await api.get<any>(`/api/admin/events/${route.params.id}`)
     form.title = data.title || ''
     form.venue = data.venue || ''
     form.description = data.description || ''
@@ -106,10 +133,25 @@ async function loadEvent() {
       price: c.price,
       stock: c.available_stock || c.stock || 0,
     })) || []
+    eventStatus.value = data.status || ''
   } catch {
     saveError.value = 'Gagal memuat data event'
   } finally {
     loading.value = false
+  }
+}
+
+async function handlePublish() {
+  publishing.value = true
+  publishError.value = ''
+  try {
+    const api = useApi()
+    await api.post(`/api/admin/events/${route.params.id}/publish`)
+    eventStatus.value = 'published'
+  } catch (err: any) {
+    publishError.value = err?.message || 'Gagal mempublikasikan event'
+  } finally {
+    publishing.value = false
   }
 }
 
@@ -118,7 +160,7 @@ async function handleSave() {
   saveError.value = ''
   try {
     const api = useApi()
-    await api.put(`/admin/events/${route.params.id}`, form)
+    await api.put(`/api/admin/events/${route.params.id}`, form)
     router.push('/admin/events')
   } catch (err: any) {
     saveError.value = err?.message || 'Gagal menyimpan event'

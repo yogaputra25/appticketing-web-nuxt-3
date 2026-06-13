@@ -100,3 +100,49 @@ func (r *UserRepository) List(ctx context.Context, page, limit int) ([]model.Use
 	}
 	return users, total, nil
 }
+
+// ListFiltered returns paginated users with optional search and role filter.
+func (r *UserRepository) ListFiltered(ctx context.Context, search, role string, page, limit int) ([]model.User, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	offset := (page - 1) * limit
+
+	q := r.db.WithContext(ctx).Model(&model.User{})
+	if search != "" {
+		like := "%" + search + "%"
+		q = q.Where("LOWER(full_name) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?)", like, like)
+	}
+	if role != "" {
+		q = q.Where("role = ?", role)
+	}
+
+	var total int64
+	if err := q.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var users []model.User
+	if err := q.Order("created_at DESC").Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return nil, 0, err
+	}
+	return users, total, nil
+}
+
+// UpdateRole changes a user's role.
+func (r *UserRepository) UpdateRole(ctx context.Context, id uint64, role string) error {
+	res := r.db.WithContext(ctx).
+		Model(&model.User{}).
+		Where("id = ?", id).
+		Update("role", role)
+	if res.Error != nil {
+		return res.Error
+	}
+	if res.RowsAffected == 0 {
+		return ErrUserNotFound
+	}
+	return nil
+}

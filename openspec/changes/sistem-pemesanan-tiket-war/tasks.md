@@ -53,45 +53,46 @@
 
 ## 6. Backend: Ticket War Queue (ticket-war)
 
-- [ ] 6.1 Setup Redis client di Go dengan connection pool
-- [ ] 6.2 Implementasi service `JoinQueue(userID, eventID)` dengan Redis ZADD ke sorted set
-- [ ] 6.3 Implementasi service `GetQueuePosition(userID, eventID)` dengan ZRANK
-- [ ] 6.4 Implementasi handler POST `/api/war/join` dengan rate limiting (5 req/min per user)
-- [ ] 6.5 Implementasi handler GET `/api/war/status` (polling) yang return posisi & is_ready
-- [ ] 6.6 Implementasi service `ProcessQueue` background worker yang advance user ke booking session
-- [ ] 6.7 Implementasi service `IssueBookingSessionToken(userID, eventID)` dengan TTL 5 menit (Redis)
-- [ ] 6.8 Implementasi cleanup job untuk queue token yang abandoned (>2 menit tidak aktif)
-- [ ] 6.9 Tulis integration tests untuk queue flow end-to-end
+- [x] 6.1 Setup Redis client di Go dengan connection pool
+- [x] 6.2 Implementasi service `JoinQueue(userID, eventID)` dengan Redis ZADD ke sorted set
+- [x] 6.3 Implementasi service `GetQueuePosition(userID, eventID)` dengan ZRANK
+- [x] 6.4 Implementasi handler POST `/api/war/join` dengan rate limiting (5 req/min per user)
+- [x] 6.5 Implementasi handler GET `/api/war/status` (polling) yang return posisi & is_ready
+- [x] 6.6 Implementasi service `ProcessQueue` background worker yang advance user ke booking session
+- [x] 6.7 Implementasi service `IssueBookingSessionToken(userID, eventID)` dengan TTL 5 menit (Redis)
+- [x] 6.8 Implementasi cleanup job untuk queue token yang abandoned (>2 menit tidak aktif)
+- [x] 6.9 Tulis integration tests untuk queue flow end-to-end
 
 ## 7. Backend: Booking Management (booking-management)
 
-- [ ] 7.1 Implementasi model Booking & BookingItem di GORM
-- [ ] 7.2 Implementasi repository Booking (Create dengan transaction, GetByUser, GetByID, UpdateStatus)
-- [ ] 7.3 Implementasi handler POST `/api/bookings/reserve` dengan validasi session token + atomic stock decrement
-- [ ] 7.4 Implementasi handler GET `/api/bookings/me` (paginated, user only)
-- [ ] 7.5 Implementasi handler GET `/api/bookings/{id}` dengan ownership check
-- [ ] 7.6 Implementasi handler POST `/api/bookings/{id}/cancel` untuk pending bookings
-- [ ] 7.7 Implementasi background job `ExpirePendingBookings` (jalan tiap 1 menit) yang release stock
-- [ ] 7.8 Tulis tests untuk booking flow: reserve → cancel → stock restored
+- [x] 7.1 Implementasi model Booking & BookingItem di GORM
+- [x] 7.2 Implementasi repository Booking (Create dengan transaction, GetByUser, GetByID, UpdateStatus)
+- [x] 7.3 Implementasi handler POST `/api/bookings/reserve` dengan validasi session token + atomic stock decrement
+- [x] 7.4 Implementasi handler GET `/api/bookings/me` (paginated, user only)
+- [x] 7.5 Implementasi handler GET `/api/bookings/{id}` dengan ownership check
+- [x] 7.6 Implementasi handler POST `/api/bookings/{id}/cancel` untuk pending bookings
+- [x] 7.7 Implementasi background job `ExpirePendingBookings` (jalan tiap 1 menit) yang release stock
+- [x] 7.8 Tulis tests untuk booking flow: reserve → cancel → stock restored
 
 ## 8. Backend: Payment Module (payment)
 
-- [ ] 8.1 Implementasi model Payment di GORM
-- [ ] 8.2 Implementasi repository Payment (Create, GetByID, UpdateStatus, ListByUser)
-- [ ] 8.3 Implementasi handler POST `/api/payments/create` untuk initiate payment
-- [ ] 8.4 Implementasi handler POST `/api/payments/{id}/simulate` (test mode) untuk success/fail
-- [ ] 8.5 Implementasi service `ConfirmPayment` yang update booking ke paid dan generate e-ticket codes (UUID)
-- [ ] 8.6 Implementasi handler GET `/api/payments/me` (user) dan GET `/api/admin/payments` (admin)
-- [ ] 8.7 Hook expiry job payment ke booking expiry (jika payment expired → booking cancelled)
-- [ ] 8.8 Tulis tests untuk payment lifecycle: create → success → e-ticket issued
+- [x] 8.1 Implementasi model Payment di GORM
+- [x] 8.2 Implementasi repository Payment (Create, GetByID, UpdateStatus, ListByUser)
+- [x] 8.3 Implementasi handler POST `/api/payments/create` untuk initiate payment
+- [x] 8.4 Implementasi handler POST `/api/payments/{id}/simulate` (test mode) untuk success/fail
+- [x] 8.5 Implementasi service `ConfirmPayment` yang update booking ke paid dan generate e-ticket codes (UUID)
+- [x] 8.6 Implementasi handler GET `/api/payments/me` (user) dan GET `/api/admin/payments` (admin)
+- [x] 8.7 Hook expiry job payment ke booking expiry (jika payment expired → booking cancelled)
+- [x] 8.8 Tulis tests untuk payment lifecycle: create → success → e-ticket issued
 
 ## 9. Backend: Admin Dashboard Endpoints
 
-- [ ] 9.1 Implementasi handler GET `/api/admin/stats` (total events, bookings, revenue, users)
-- [ ] 9.2 Implementasi handler GET `/api/admin/bookings` dengan filter status, date range
-- [ ] 9.3 Implementasi handler POST `/api/admin/users` untuk create admin user
-- [ ] 9.4 Implementasi handler GET `/api/admin/users` untuk list users
-- [ ] 9.5 Tulis seeder untuk admin user default + sample event
+- [x] 9.1 Implementasi handler GET `/api/admin/stats` (total events, bookings, revenue, users)
+- [x] 9.2 Implementasi handler GET `/api/admin/bookings` dengan filter status, date range
+- [x] 9.3 Implementasi handler POST `/api/admin/users` untuk create admin user
+- [x] 9.4 Implementasi handler GET `/api/admin/users` untuk list users
+- [x] 9.5 Tulis seeder untuk admin user default + sample event
+- [x] 9.6 Implementasi handler GET `/api/admin/bookings/{id}` dengan user & event associations
 
 ## 10. Frontend: Setup & Layout (Nuxt 3 + Tailwind)
 
@@ -119,29 +120,29 @@
 
 ## 13. Frontend: Booking & Payment Pages
 
-- [ ] 13.1 Halaman Payment (`/bookings/[id]/pay`) — instruksi pembayaran, timer countdown, simulasi button
-- [ ] 13.2 Halaman My Bookings (`/my/bookings`) — list booking dengan status badges
-- [ ] 13.3 Halaman E-Ticket (`/my/bookings/[id]`) — detail + kode e-ticket dengan QR placeholder
-- [ ] 13.4 Halaman Profile (`/profile`) — view & edit profil user
+- [x] 13.1 Halaman Payment (`/bookings/[id]/pay`) — instruksi pembayaran, timer countdown, simulasi button
+- [x] 13.2 Halaman My Bookings (`/my/bookings`) — list booking dengan status badges
+- [x] 13.3 Halaman E-Ticket (`/my/bookings/[id]`) — detail + kode e-ticket dengan QR placeholder
+- [x] 13.4 Halaman Profile (`/profile`) — view & edit profil user
 
 ## 14. Frontend: Admin Dashboard
 
-- [ ] 14.1 Layout admin dengan sidebar navigation
-- [ ] 14.2 Halaman Admin Dashboard (`/admin`) — statistik cards (revenue, bookings, events)
-- [ ] 14.3 Halaman Admin Events (`/admin/events`) — CRUD events dengan form & table
-- [ ] 14.4 Halaman Admin Event Detail (`/admin/events/[id]`) — manage ticket categories
-- [ ] 14.5 Halaman Admin Bookings (`/admin/bookings`) — list & filter all bookings
-- [ ] 14.6 Halaman Admin Payments (`/admin/payments`) — payment monitoring
-- [ ] 14.7 Halaman Admin Users (`/admin/users`) — list & manage users
+- [x] 14.1 Layout admin dengan sidebar navigation
+- [x] 14.2 Halaman Admin Dashboard (`/admin`) — statistik cards (revenue, bookings, events)
+- [x] 14.3 Halaman Admin Events (`/admin/events`) — CRUD events dengan form & table
+- [x] 14.4 Halaman Admin Event Detail (`/admin/events/[id]`) — manage ticket categories
+- [x] 14.5 Halaman Admin Bookings (`/admin/bookings`) — list & filter all bookings
+- [x] 14.6 Halaman Admin Payments (`/admin/payments`) — payment monitoring
+- [x] 14.7 Halaman Admin Users (`/admin/users`) — list & manage users
 
 ## 15. Integration, Testing & Polish
 
-- [ ] 15.1 End-to-end test flow: register → login → browse event → war → queue → book → pay → e-ticket
-- [ ] 15.2 Setup seed data (1 admin, 3 events dengan 2-3 kategori masing-masing)
-- [ ] 15.3 Tulis README dengan setup instructions, env vars, dan deployment notes
-- [ ] 15.4 Setup error handling & loading states konsisten di semua halaman
-- [ ] 15.5 Tambahkan empty states & 404 page
-- [ ] 15.6 Optimasi responsive design untuk mobile (Tailwind breakpoints)
-- [ ] 15.7 Setup logging di Go (slog) dan request ID middleware
-- [ ] 15.8 Performance check: load test 1000 concurrent users dengan `k6` atau `wrk`
-- [ ] 15.9 Final review: cek ulang semua spec scenarios terpenuhi
+- [x] 15.1 End-to-end test flow: register → login → browse event → war → queue → book → pay → e-ticket
+- [x] 15.2 Setup seed data (1 admin, 3 events dengan 2-3 kategori masing-masing)
+- [x] 15.3 Tulis README dengan setup instructions, env vars, dan deployment notes
+- [x] 15.4 Setup error handling & loading states konsisten di semua halaman
+- [x] 15.5 Tambahkan empty states & 404 page
+- [x] 15.6 Optimasi responsive design untuk mobile (Tailwind breakpoints)
+- [x] 15.7 Setup logging di Go (slog) dan request ID middleware
+- [x] 15.8 Performance check: load test 1000 concurrent users dengan `k6` atau `wrk`
+- [x] 15.9 Final review: cek ulang semua spec scenarios terpenuhi

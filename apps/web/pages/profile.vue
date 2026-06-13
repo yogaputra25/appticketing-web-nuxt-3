@@ -88,10 +88,11 @@ async function handleSave() {
   saveSuccess.value = false
   try {
     const api = useApi()
-    await api.put('/auth/profile', {
+    await api.put('/api/auth/me', {
       full_name: form.full_name,
       phone: form.phone || undefined,
     })
+    await auth.fetchMe()
     saveSuccess.value = true
     setTimeout(() => { saveSuccess.value = false }, 3000)
   } catch (err: any) {

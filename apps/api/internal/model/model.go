@@ -91,6 +91,8 @@ type Booking struct {
 	BookingCode     string         `gorm:"size:32;uniqueIndex;not null" json:"booking_code"`
 	UserID          uint64         `gorm:"not null;index" json:"user_id"`
 	EventID         uint64         `gorm:"not null;index" json:"event_id"`
+	User            *User          `gorm:"foreignKey:UserID" json:"user,omitempty"`
+	Event           *Event         `gorm:"foreignKey:EventID" json:"event,omitempty"`
 	TotalAmount     float64        `gorm:"type:numeric(15,2);not null" json:"total_amount"`
 	Status          string         `gorm:"size:32;not null;default:pending_payment" json:"status"`
 	ExpiresAt       *time.Time     `json:"expires_at,omitempty"`

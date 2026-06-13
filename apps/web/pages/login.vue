@@ -65,6 +65,14 @@ const auth = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+// Auto-redirect if already authenticated (e.g., after SSR hydration restores token)
+onMounted(() => {
+  if (auth.isAuthenticated) {
+    const redirect = (route.query.redirect as string) || '/'
+    router.push(redirect)
+  }
+})
+
 const email = ref('')
 const password = ref('')
 const errors = ref<Record<string, string>>({})
