@@ -3,6 +3,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-09-01',
   devtools: { enabled: true },
 
+  devServer: {
+    https: {
+      key: './localhost+3-key.pem',
+      cert: './localhost+3.pem',
+    },
+  },
+
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',
@@ -32,5 +39,9 @@ export default defineNuxtConfig({
 
   typescript: {
     strict: true,
+  },
+
+  build: {
+    transpile: ['vue-qrcode-reader'],
   },
 })

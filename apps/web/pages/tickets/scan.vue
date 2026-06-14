@@ -15,6 +15,7 @@
         <QrcodeStream
           :paused="scanned"
           :formats="['qr_code']"
+          :constraints="{ facingMode: 'environment', width: { min: 360, ideal: 640 }, height: { min: 360, ideal: 640 } }"
           @detect="onDetect"
           @camera-on="cameraReady = true"
           @error="onError"
