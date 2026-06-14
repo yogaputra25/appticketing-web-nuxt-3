@@ -22,14 +22,16 @@ type PaymentHandler struct {
 	payments *repository.PaymentRepository
 	bookings *repository.BookingRepository
 	catRepo  *repository.TicketCategoryRepository
+	tickets  *repository.TicketRepository
 }
 
 func NewPaymentHandler(
 	payments *repository.PaymentRepository,
 	bookings *repository.BookingRepository,
 	catRepo *repository.TicketCategoryRepository,
+	tickets *repository.TicketRepository,
 ) *PaymentHandler {
-	return &PaymentHandler{payments: payments, bookings: bookings, catRepo: catRepo}
+	return &PaymentHandler{payments: payments, bookings: bookings, catRepo: catRepo, tickets: tickets}
 }
 
 type createPaymentRequest struct {
@@ -136,12 +138,6 @@ func (h *PaymentHandler) Simulate(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
 
 	if req.Action == "success" {
-		eTicketCodes, err := generateETicketCodes(bookingItemsQuantity(r.Context(), h.bookings, payment.BookingID))
-		if err != nil {
-			httputil.Internal(w, fmt.Errorf("generate e-ticket: %w", err))
-			return
-		}
-
 		if err := h.payments.UpdateStatus(r.Context(), id, model.PaymentStatusSuccess, &now, map[string]string{
 			"simulated_at": now.Format(time.RFC3339),
 			"result":       "approved",
@@ -155,15 +151,16 @@ func (h *PaymentHandler) Simulate(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := h.bookings.UpdateETicketCodes(r.Context(), payment.BookingID, eTicketCodes); err != nil {
-			httputil.Internal(w, err)
+		tickets, err := h.createTicketsForBooking(r.Context(), payment.BookingID)
+		if err != nil {
+			httputil.Internal(w, fmt.Errorf("create tickets: %w", err))
 			return
 		}
 
 		httputil.JSON(w, http.StatusOK, map[string]interface{}{
 			"status":         model.PaymentStatusSuccess,
 			"paid_at":        now,
-			"e_ticket_codes": eTicketCodes,
+			"ticket_count":   len(tickets),
 		})
 		return
 	}
@@ -232,26 +229,47 @@ func generatePaymentCodeHandler() string {
 	return "PAY-" + hex.EncodeToString(b)
 }
 
-func generateETicketCodes(quantity int) ([]string, error) {
-	codes := make([]string, quantity)
-	for i := 0; i < quantity; i++ {
-		b := make([]byte, 16)
-		if _, err := rand.Read(b); err != nil {
-			return nil, err
-		}
-		codes[i] = "TCK-" + hex.EncodeToString(b)
+func (h *PaymentHandler) createTicketsForBooking(ctx context.Context, bookingID uint64) ([]model.Ticket, error) {
+	booking, err := h.bookings.GetByID(ctx, bookingID)
+	if err != nil {
+		return nil, err
 	}
-	return codes, nil
+
+	var tickets []model.Ticket
+	for _, item := range booking.Items {
+		cat, err := h.catRepo.FindByID(ctx, item.TicketCategoryID)
+		if err != nil {
+			return nil, fmt.Errorf("lookup category %d: %w", item.TicketCategoryID, err)
+		}
+		for i := 0; i < item.Quantity; i++ {
+			code, err := generateTicketCode()
+			if err != nil {
+				return nil, err
+			}
+			tickets = append(tickets, model.Ticket{
+				BookingID:    bookingID,
+				TicketCode:   code,
+				CategoryName: cat.Name,
+				Status:       model.TicketStatusActive,
+			})
+		}
+	}
+
+	if len(tickets) == 0 {
+		return nil, nil
+	}
+
+	if err := h.tickets.CreateBatch(ctx, tickets); err != nil {
+		return nil, err
+	}
+
+	return tickets, nil
 }
 
-func bookingItemsQuantity(ctx context.Context, bookingRepo *repository.BookingRepository, bookingID uint64) int {
-	booking, err := bookingRepo.GetByID(ctx, bookingID)
-	if err != nil {
-		return 0
+func generateTicketCode() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
 	}
-	total := 0
-	for _, item := range booking.Items {
-		total += item.Quantity
-	}
-	return total
+	return "TCK-" + hex.EncodeToString(b), nil
 }

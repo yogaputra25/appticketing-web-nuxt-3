@@ -33,6 +33,7 @@ func main() {
 		&model.BookingItem{},
 		&model.Payment{},
 		&model.QueueToken{},
+		&model.Ticket{},
 	); err != nil {
 		fmt.Fprintf(os.Stderr, "migrate error: %v\n", err)
 		os.Exit(1)

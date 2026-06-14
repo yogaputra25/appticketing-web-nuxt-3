@@ -174,6 +174,27 @@ type QueueToken struct {
 func (QueueToken) TableName() string { return "queue_tokens" }
 
 // =====================================================
+// Ticket
+// =====================================================
+const (
+	TicketStatusActive   = "active"
+	TicketStatusUsed     = "used"
+	TicketStatusRefunded = "refunded"
+)
+
+type Ticket struct {
+	ID           uint64     `gorm:"primaryKey" json:"id"`
+	BookingID    uint64     `gorm:"not null;index" json:"booking_id"`
+	TicketCode   string     `gorm:"size:64;uniqueIndex;not null" json:"ticket_code"`
+	CategoryName string     `gorm:"size:100;not null" json:"category_name"`
+	Status       string     `gorm:"size:32;not null;default:active" json:"status"`
+	ScannedAt    *time.Time `json:"scanned_at,omitempty"`
+	CreatedAt    time.Time  `json:"created_at"`
+}
+
+func (Ticket) TableName() string { return "tickets" }
+
+// =====================================================
 // JSON helper types
 // =====================================================
 // JSONStringList is a []string stored as JSONB in Postgres.

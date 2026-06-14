@@ -66,6 +66,7 @@ func New(cfg *config.Config, db *gorm.DB, rdb *redis.Client) http.Handler {
 	// Repositories
 	bookingRepo := repository.NewBookingRepository(db)
 	paymentRepo := repository.NewPaymentRepository(db)
+	ticketRepo := repository.NewTicketRepository(db)
 
 	// Handlers
 	authH := handler.NewAuthHandler(userRepo, jwtMgr)
@@ -73,7 +74,8 @@ func New(cfg *config.Config, db *gorm.DB, rdb *redis.Client) http.Handler {
 	catH := handler.NewTicketCategoryHandler(catRepo)
 	warH := handler.NewWarHandler(warSvc, eventRepo, catRepo)
 	bookingH := handler.NewBookingHandler(bookingRepo, catRepo, warSvc, eventRepo, cfg.BookingTTLMinutes)
-	paymentH := handler.NewPaymentHandler(paymentRepo, bookingRepo, catRepo)
+	paymentH := handler.NewPaymentHandler(paymentRepo, bookingRepo, catRepo, ticketRepo)
+	ticketH := handler.NewTicketHandler(ticketRepo, bookingRepo)
 	adminH := handler.NewAdminHandler(bookingRepo, userRepo, eventRepo)
 
 	// API routes
@@ -146,6 +148,14 @@ func New(cfg *config.Config, db *gorm.DB, rdb *redis.Client) http.Handler {
 			r.Post("/create", paymentH.Create)
 			r.Get("/me", paymentH.ListMy)
 			r.Post("/{id}/simulate", paymentH.Simulate)
+		})
+
+		// Tickets (authenticated)
+		r.Route("/tickets", func(r chi.Router) {
+			r.Use(jwtMgr.Authenticator)
+			r.Get("/", ticketH.ListMy)
+			r.Get("/{id}", ticketH.Detail)
+			r.Post("/verify/{code}", ticketH.Verify)
 		})
 	})
 
